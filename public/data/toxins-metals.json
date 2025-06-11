@@ -1,0 +1,8 @@
+{
+  "title": "Toxins & Metals Report",
+  "description": "Metal test results for environmental and food absorption tracking",
+  "high_traces": ["Mercury (Hg)"],
+  "medium_traces": ["Sodium (Na)"],
+  "low_traces": ["Beryllium (Be)", "Platinum (Pt)"],
+  "note": "We always absorb from the environment and our food. This is a helpful tool to make connections to potential symptoms."
+}

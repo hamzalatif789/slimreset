@@ -1,0 +1,150 @@
+{
+  "title": "Medical Docket - Personal Information",
+  "client_name": "Liliana Kostic",
+  "email": "lili.kostic8@gmail.com",
+  "birthdate": "06/17/1969",
+  "gender": "female",
+  "current_weight": 166,
+  "goal_weight": 125,
+  "height": "5'6",
+  "medications": {
+    "prescribed": {
+      "has_medications": true,
+      "list": [
+        "perindopril erbumine/indapamide 8-2-5mg",
+        "biphentin 40mg",
+        "gabapentin 300mg",
+        "celexa",
+        "advair 250/25"
+      ]
+    },
+    "otc": {
+      "has_medications": true,
+      "list": ["advil", "tylenol"]
+    },
+    "supplements": {
+      "has_supplements": true,
+      "list": ["magnesium"]
+    }
+  },
+  "lifestyle": {
+    "smoking": {
+      "smokes": true,
+      "amount": "1 pack per day"
+    },
+    "alcohol": {
+      "drinks": true,
+      "amount": "3 drinks per day"
+    },
+    "caffeine": {
+      "consumes": true,
+      "amount": "10 cups coffee per day"
+    }
+  },
+  "family_medical_history": {
+    "heart_disease": false,
+    "high_blood_pressure": {
+      "has_condition": true,
+      "family_member": "Mother"
+    },
+    "diabetes": false,
+    "arthritis": false,
+    "skin_disorders": false,
+    "blood_clots": false,
+    "cancer": false,
+    "kidney_disease": false,
+    "liver_disease": false,
+    "gallbladder_disease": {
+      "has_condition": true,
+      "family_member": "Mother"
+    }
+  },
+  "medical_history": {
+    "past_conditions": {
+      "has_conditions": true,
+      "description": "mini stroke at age 37, PTSD disorder, insomnia"
+    },
+    "present_conditions": {
+      "has_conditions": false,
+      "description": ""
+    }
+  },
+  "symptoms": {
+    "abnormal_bleeding": false,
+    "fever_chills_sweats": {
+      "has_symptom": true,
+      "doctor_aware": true,
+      "description": "sometimes i get this not always but always cold",
+      "treatment": "no"
+    },
+    "difficult_urination": false,
+    "pain_during_intercourse": false,
+    "pelvic_pain": false,
+    "new_lumps": false,
+    "low_bone_density": false,
+    "electrolyte_abnormalities": {
+      "has_symptom": true,
+      "doctor_aware": true,
+      "duration": "few years",
+      "treatment": "magnesium pills"
+    },
+    "painful_joints": false
+  },
+  "women_specific": {
+    "pregnant": false,
+    "breastfeeding": false,
+    "planning_baby": false,
+    "fibroids": {
+      "has_condition": true,
+      "doctor_aware": true,
+      "treatment": "No"
+    },
+    "breast_issues": false,
+    "ovarian_cysts": {
+      "has_condition": true,
+      "doctor_aware": true,
+      "treatment": "No"
+    },
+    "postmenopausal_bleeding": {
+      "has_condition": true,
+      "doctor_aware": true,
+      "treatment": "No"
+    },
+    "abnormal_discharge": false,
+    "last_menstrual_date": "06/03/2024",
+    "menopause_symptoms": {
+      "has_symptoms": true,
+      "description": "hot flashes and other menopause symptoms"
+    }
+  },
+  "prescription_details": {
+    "type": "30-Day Cream Prescription",
+    "medication": "Human Chorionic Gonadotropin",
+    "dosage": "600units/g Topical",
+    "instructions": "Apply one pump to forearm daily for 30 days (1 pump daily)",
+    "refills": 0,
+    "prescriber": "Amandeep Gill, NP, medical lead",
+    "prac_id": "16125113",
+    "date_signed": "2025-03-31 18:43:49"
+  },
+  "fulfillment": {
+    "client_name": "Liliana Kostic",
+    "telephone": "4038706888",
+    "email": "lili.kostic8@gmail.com",
+    "shipping": "Would like to Pick Up",
+    "items": [
+      {
+        "quantity": 1,
+        "description": "30 Day hCG Cream"
+      },
+      {
+        "quantity": 1,
+        "description": "Vitamin B12, Calcium and Magnesium"
+      },
+      {
+        "quantity": 1,
+        "description": "Fulfillment Checklist"
+      }
+    ]
+  }
+}

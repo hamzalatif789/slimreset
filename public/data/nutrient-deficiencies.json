@@ -1,0 +1,8 @@
+{
+  "title": "Nutrient Deficiencies Report",
+  "description": "Nutritional deficiencies that can typically be improved",
+  "optimal": ["Vitamin E", "Omega 3", "Vitamin C", "Omega 6", "Carnitine"],
+  "fair": ["Meso-Inositol", "Zn Zinc", "Omega 9", "Vitamin D3"],
+  "low": ["Vitamin A", "Magnesium", "Potassium"],
+  "note": "The nutrients that have shown as potentially deficient in your system can typically be improved"
+}

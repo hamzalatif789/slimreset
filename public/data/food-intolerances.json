@@ -1,0 +1,43 @@
+{
+  "title": "Food Intolerances Report",
+  "description": "Intolerance levels from most severe/high red to moderate yellow intolerances",
+  "high_intolerance": [
+    "Yam",
+    "Wheat Gluten",
+    "Tomato",
+    "Tilapia",
+    "Sweet Potato",
+    "Spinach",
+    "Shrimp",
+    "Rye Gluten",
+    "Pistachio",
+    "Peanut",
+    "Lobster",
+    "Lentils",
+    "Lactose",
+    "Kiwi",
+    "Hemp Seed",
+    "E951 Aspartame",
+    "E129 Allura Red AC",
+    "Cauliflower",
+    "Barley Gluten",
+    "Banana"
+  ],
+  "medium_intolerance": [
+    "Walnut",
+    "Tuna, Yellowfin",
+    "Tuna, Bluefin",
+    "Salmon, Pacific",
+    "Pork",
+    "Onion",
+    "Haddock",
+    "Flaxseed",
+    "Eggplant (Aubergine)",
+    "Cocoa",
+    "Cabbage",
+    "Bell Pepper (red)",
+    "Beef",
+    "Almond"
+  ],
+  "inflammation_note": "Intolerances may create inflammation at varying degrees"
+}
