@@ -1,7 +1,9 @@
+/* Import Tailwind's base, components, and utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Custom styles */
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -84,6 +86,12 @@ body {
   }
 }
 
+/* Custom rule for the ring color */
+.focus-visible\:ring-ring:focus-visible {
+  --tw-ring-color: #7c3aed !important; /* Purple-500 color with !important */
+}
+
+/* Applying Tailwind's utilities */
 @layer base {
   * {
     @apply border-border;

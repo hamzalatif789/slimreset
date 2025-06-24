@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  console.log("✅ Weight proxy GET route called");
+  // console.log("✅ Weight proxy GET route called");
   try {
     const response = await fetch("https://getslimreset.vercel.app/api/weight");
     const data = await response.json();
+    console.log("📥 Received data from external API:", data);
   
     return NextResponse.json(data);
     
@@ -16,7 +17,7 @@ export async function GET() {
 
 
 export async function POST(request) {
-  console.log("✅ Weight proxy POST route called");
+  // console.log("✅ Weight proxy POST route called");
   try {
     const body = await request.json();
     console.log("📤 Sending to external API:", body);
@@ -34,7 +35,7 @@ export async function POST(request) {
     }
 
     const data = await response.json();
-    console.log("✅ External API response:", data);
+    // console.log("✅ External API response:", data);
     return NextResponse.json(data);
   } catch (error) {
     console.error("❌ Error in weight POST:", error);

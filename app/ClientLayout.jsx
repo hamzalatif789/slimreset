@@ -8,29 +8,50 @@ import "./globals.css"
 export default function ClientLayout({ children }) {
   const [currentPage, setCurrentPage] = useState("ava")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
 
   const navigationItems = [
     {
       id: "ava",
-      label: "Ava",
+      label: "ava",
       icon: MessageCircle,
     },
     {
       id: "tracker",
-      label: "My Tracker",
+      label: "my tracker",
       icon: BarChart3,
     },
   ]
 
+  // Load saved state from localStorage on component mount
   useEffect(() => {
-    const mainContent = document.querySelector("[data-page]")
-    if (mainContent) {
-      mainContent.setAttribute("data-page", currentPage)
+    const savedPage = localStorage.getItem("weightLossCurrentPage")
+    const savedSidebarState = localStorage.getItem("weightLossSidebarCollapsed")
+    
+    if (savedPage && (savedPage === "ava" || savedPage === "tracker")) {
+      setCurrentPage(savedPage)
     }
-  }, [currentPage])
+    
+    if (savedSidebarState !== null) {
+      setSidebarCollapsed(JSON.parse(savedSidebarState))
+    }
+    
+    setIsLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (isLoaded) {
+      const mainContent = document.querySelector("[data-page]")
+      if (mainContent) {
+        mainContent.setAttribute("data-page", currentPage)
+      }
+    }
+  }, [currentPage, isLoaded])
 
   const handlePageChange = (pageId) => {
     setCurrentPage(pageId)
+    // Save to localStorage
+    localStorage.setItem("weightLossCurrentPage", pageId)
 
     // Dispatch custom event for the main page component
     window.dispatchEvent(
@@ -40,26 +61,38 @@ export default function ClientLayout({ children }) {
     )
   }
 
+  const handleSidebarToggle = () => {
+    const newCollapsedState = !sidebarCollapsed
+    setSidebarCollapsed(newCollapsedState)
+    // Save sidebar state to localStorage
+    localStorage.setItem("weightLossSidebarCollapsed", JSON.stringify(newCollapsedState))
+  }
+
+  // Don't render until we've loaded the saved state
+  if (!isLoaded) {
+    return <div className="flex h-screen bg-gray-50 items-center justify-center">Loading...</div>
+  }
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 ">
       {/* Left Sidebar */}
       <div
-        className={`relative bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex-shrink-0 ${
+        className={`relative bg-[#946CFC]  border-r border-gray-200 transition-all duration-300 ease-in-out flex-shrink-0 ${
           sidebarCollapsed ? "w-16" : "w-64"
         }`}
       >
         {/* Sidebar Toggle Button */}
         <Button
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onClick={handleSidebarToggle}
           variant="ghost"
           size="sm"
-          className="absolute -right-3 top-6 z-10 h-6 w-6 rounded-full border border-gray-200 bg-white p-0 shadow-md hover:bg-gray-50"
+          className="absolute -right-3 top-6 z-10 h-6 w-6 rounded-full  border border-gray-200 bg-white p-0 shadow-md hover:bg-gray-50"
         >
           {sidebarCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
         </Button>
 
         {/* Sidebar Content */}
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col text-white">
           {/* Logo Section */}
           <div className={`flex items-center border-b border-gray-200 p-4 ${sidebarCollapsed && "justify-center p-2"}`}>
             {!sidebarCollapsed ? (
@@ -68,8 +101,8 @@ export default function ClientLayout({ children }) {
                   <span className="text-white font-bold text-sm">S</span>
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900">SlimReset</div>
-                  <div className="text-xs text-gray-500">Weight Loss Coach</div>
+                  <div className="font-bold text-white ">SlimReset</div>
+                  
                 </div>
               </div>
             ) : (
@@ -103,7 +136,7 @@ export default function ClientLayout({ children }) {
         </div>
       </div>
 
-      {/* Main Content Area - FIXED: Changed overflow-hidden to overflow-y-auto */}
+      {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto">
         <div data-page={currentPage} className="min-h-full">
           {children}
