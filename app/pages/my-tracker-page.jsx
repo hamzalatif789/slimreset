@@ -490,14 +490,14 @@ export default function MyTrackerPage() {
 
                   {/* progress stats with arrow indicators */}
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-3 bg-red-50 rounded-lg">
+                    <div className="text-center p-3 bg-green-50 rounded-lg">
                       <div className="flex items-center justify-center gap-1 mb-1">
                         {weightData.hasWeightForDate && weightData.weightChange.isLoss !== null && (
                           <>
                             {weightData.weightChange.isLoss ? (
-                              <ArrowDown className="h-4 w-4 text-red-600" />
+                              <ArrowDown className="h-4 w-4 text-green-600" />
                             ) : (
-                              <ArrowUp className="h-4 w-4 text-green-600" />
+                              <ArrowUp className="h-4 w-4 text-red-600" />
                             )}
                           </>
                         )}
@@ -505,15 +505,15 @@ export default function MyTrackerPage() {
                           className={`text-lg font-bold ${
                             weightData.hasWeightForDate && weightData.weightChange.isLoss !== null
                               ? weightData.weightChange.isLoss
-                                ? "text-red-600"
-                                : "text-green-600"
-                              : "text-red-600"
+                                ? "text-green-600"
+                                : "text-red-600"
+                              : "text-green-600"
                           }`}
                         >
                           {weightData.hasWeightForDate ? weightData.weightChange.value : 0}lbs
                         </div>
                       </div>
-                      <div className="text-xs text-red-500 font-medium">
+                      <div className="text-xs text-green-500 font-medium">
                         {weightData.hasWeightForDate && 
                         weightData.weightChange.isLoss === false ? "gained" : "lost"}
                       </div>
@@ -572,13 +572,13 @@ export default function MyTrackerPage() {
                                     {day.weightChange.isLoss !== null ? (
                                       <div className="flex items-center justify-center gap-1">
                                         {day.weightChange.isLoss ? (
-                                          <ArrowDown className="h-3 w-3 text-red-600" />
+                                          <ArrowDown className="h-3 w-3 text-green-600" />
                                         ) : (
-                                          <ArrowUp className="h-3 w-3 text-green-600" />
+                                          <ArrowUp className="h-3 w-3 text-red-600" />
                                         )}
                                         <span
                                           className={`font-medium text-xs ${
-                                            day.weightChange.isLoss ? "text-red-600" : "text-green-600"
+                                            day.weightChange.isLoss ? "text-green-600" : "text-red-600"
                                           }`}
                                         >
                                           {day.weightChange.display}
