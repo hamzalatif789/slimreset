@@ -42,6 +42,7 @@ export default function AvaPage() {
   const [showWelcome, setShowWelcome] = useState(false)
   const [welcomeAnimation, setWelcomeAnimation] = useState(false)
   const [isPageLoading, setIsPageLoading] = useState(true)
+  const [showThinking, setShowThinking] = useState(false)
 
   // ==================== REFS ====================
   const messagesEndRef = useRef(null)
@@ -71,25 +72,72 @@ export default function AvaPage() {
 
   // Extract quantity from user input using regex
   const extractQuantityFromInput = (input) => {
+    console.log("🔍 Extracting quantity from input:", input)
+
+    // Text number mapping
+    const textNumbers = {
+      one: "1",
+      two: "2",
+      three: "3",
+      four: "4",
+      five: "5",
+      six: "6",
+      seven: "7",
+      eight: "8",
+      nine: "9",
+      ten: "10",
+    }
+
+    // Convert text numbers to digits
+    let processedInput = input.toLowerCase()
+    Object.keys(textNumbers).forEach((word) => {
+      const regex = new RegExp(`\\b${word}\\b`, "gi")
+      processedInput = processedInput.replace(regex, textNumbers[word])
+    })
+
+    console.log("🔄 Processed input:", processedInput)
+
     // First try to extract standard quantity patterns
     const quantityRegex =
       /(\d+(?:\.\d+)?)\s*(cups?|pieces?|slices?|grams?|g|kg|ounces?|oz|lbs?|pounds?|tablespoons?|tbsp|teaspoons?|tsp|servings?|serving)/i
-    const match = input.match(quantityRegex)
+    const match = processedInput.match(quantityRegex)
 
     if (match) {
-      return `${match[1]} ${match[2]}`
+      const result = `${match[1]} ${match[2]}`
+      console.log("✅ Found quantity with unit:", result)
+      return result
     }
 
-    // Try to extract from sentences like "the quantity was 5 serving"
+    // Try to extract from sentences like "the quantity was 5"
     const sentenceQuantityRegex =
-      /(?:quantity was|amount was|had|ate)\s*(\d+(?:\.\d+)?)\s*(cups?|pieces?|slices?|grams?|g|kg|ounces?|oz|lbs?|pounds?|tablespoons?|tbsp|teaspoons?|tsp|servings?|serving)/i
-    const sentenceMatch = input.match(sentenceQuantityRegex)
+      /(?:quantity was|amount was|had|ate)\s*(\d+(?:\.\d+)?)\s*(cups?|pieces?|slices?|grams?|g|kg|ounces?|oz|lbs?|pounds?|tablespoons?|tbsp|teaspoons?|tsp|servings?|serving)?/i
+    const sentenceMatch = processedInput.match(sentenceQuantityRegex)
 
     if (sentenceMatch) {
-      return `${sentenceMatch[1]} ${sentenceMatch[2]}`
+      if (sentenceMatch[2]) {
+        // Unit was specified
+        const result = `${sentenceMatch[1]} ${sentenceMatch[2]}`
+        console.log("✅ Found quantity from sentence with unit:", result)
+        return result
+      } else {
+        // No unit specified, just return the number
+        const result = sentenceMatch[1]
+        console.log("✅ Found quantity from sentence without unit:", result)
+        return result
+      }
     }
 
-    // If no specific quantity found, return the trimmed input
+    // Check if it's just a number
+    const numberOnlyRegex = /^\s*(\d+(?:\.\d+)?)\s*$/
+    const numberMatch = processedInput.match(numberOnlyRegex)
+
+    if (numberMatch) {
+      const result = numberMatch[1]
+      console.log("✅ Found number only:", result)
+      return result
+    }
+
+    console.log("❌ No quantity pattern found")
     return input.trim()
   }
 
@@ -113,14 +161,26 @@ export default function AvaPage() {
         localStorage.removeItem(STORAGE_KEYS.CHAT)
         sessionStorage.setItem(STORAGE_KEYS.SESSION_FLAG, "active")
 
-        // Show welcome message after delay
+        // Show thinking message in chat first
         setTimeout(() => {
-          setMessages([WELCOME_MESSAGE])
+          const thinkingMessage = {
+            id: "thinking",
+            role: "assistant",
+            content: "Thinking...",
+          }
+          setMessages([thinkingMessage])
           setShowWelcome(true)
           setIsPageLoading(false)
+        }, 100)
+
+        // After 3 seconds, replace thinking with welcome message
+        setTimeout(() => {
+          setMessages([WELCOME_MESSAGE])
           setTimeout(() => {
             setWelcomeAnimation(true)
-            showTimeBasedMessage() // Only call once here
+            setTimeout(() => {
+              showTimeBasedMessage()
+            }, 2000)
           }, 50)
           setIsInitialLoad(false)
         }, 3000)
@@ -155,15 +215,29 @@ export default function AvaPage() {
     }
   }, [])
 
-  // Show welcome message with delay
+  // Show thinking message first, then welcome message with delay
   const showWelcomeWithDelay = () => {
+    // First show thinking message in chat
     setTimeout(() => {
-      setMessages([WELCOME_MESSAGE])
+      const thinkingMessage = {
+        id: "thinking",
+        role: "assistant",
+        content: "Thinking...",
+      }
+      setMessages([thinkingMessage])
       setShowWelcome(true)
       setIsPageLoading(false)
+    }, 100)
+
+    // After 3 seconds, replace thinking with welcome message
+    setTimeout(() => {
+      setMessages([WELCOME_MESSAGE])
       setTimeout(() => {
         setWelcomeAnimation(true)
-        showTimeBasedMessage() // Only call once here
+        // After 2 seconds, show time-based message
+        setTimeout(() => {
+          showTimeBasedMessage()
+        }, 2000)
       }, 50)
       setIsInitialLoad(false)
     }, 3000)
@@ -236,17 +310,39 @@ export default function AvaPage() {
   // Analyze user data for meals, weight, calories
   const analyzeUserData = async (userInput) => {
     try {
+      console.log("🔍 Calling analyze-meal API with input:", userInput)
+
       const response = await fetch("/api/analyze-meal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userInput }),
       })
-      if (!response.ok) return null
+
+      console.log("📡 API Response status:", response.status, response.statusText)
+
+      if (!response.ok) {
+        console.error("❌ API response not ok:", response.status, response.statusText)
+        return null
+      }
+
       const data = await response.json()
       console.log("📥 Analysis result:", data)
+
+      // Additional validation
+      if (!data || typeof data !== "object") {
+        console.error("❌ Invalid response format:", data)
+        return null
+      }
+
+      if (data.analysis === null || data.analysis === undefined) {
+        console.error("❌ Analysis is null/undefined:", data)
+        return null
+      }
+
+      console.log("✅ Valid analysis received:", data.analysis)
       return data.analysis
     } catch (error) {
-      console.error("Error analyzing user data:", error)
+      console.error("❌ Error analyzing user data:", error)
       return null
     }
   }
@@ -437,15 +533,27 @@ export default function AvaPage() {
   // ==================== FORM HANDLERS ====================
 
   // Handle quantity response flow
-  const handleQuantityResponse = async (currentInput, userMessage) => {
-    const quantityFromInput = extractQuantityFromInput(currentInput)
+  const handleQuantityResponse = async (quantityValue, userMessage) => {
+    console.log("📥 Processing quantity:", quantityValue, "for meal:", pendingMeal.name)
+    console.log("📊 Original pending meal:", pendingMeal)
 
-    // Clean the quantity to remove any extra text
-    const cleanQuantity = quantityFromInput.replace(/^(the quantity was|amount was|had|ate)\s*/i, "").trim()
+    // Clean and format the quantity
+    let cleanQuantity = quantityValue.trim()
+
+    // If it's just a number without unit, add "serving" as default
+    const numberOnlyRegex = /^\d+(\.\d+)?$/
+    if (numberOnlyRegex.test(cleanQuantity)) {
+      cleanQuantity = `${cleanQuantity} `
+    }
+
+    // Remove duplicate "serving" if it exists (fix the regex)
+    cleanQuantity = cleanQuantity.replace(/\bserving\s+serving\b/gi, "serving")
+
+    console.log("🔧 Cleaned quantity:", cleanQuantity)
 
     const updatedMeal = {
       ...pendingMeal,
-      quantity: cleanQuantity, // Store only clean quantity like "5 serving"
+      quantity: cleanQuantity,
     }
 
     console.log("📥 Updated meal with quantity:", updatedMeal)
@@ -453,12 +561,15 @@ export default function AvaPage() {
     const enrichedMeals = await enrichMealsWithNutrition([updatedMeal], updatedMeal.originalInput || pendingMeal.name)
     const nutritionData = enrichedMeals.filter((meal) => meal.edamamEnriched)
 
+    console.log("🍽️ Final enriched meals to store:", enrichedMeals)
+
     // Store meals
     await storeMealsInDatabase(enrichedMeals)
 
     updateHealthData({ meals: enrichedMeals })
 
     // Reset quantity flow state
+    console.log("✅ Resetting pending meal state after successful quantity update")
     setPendingMeal(null)
     setAwaitingQuantity(false)
 
@@ -476,6 +587,7 @@ export default function AvaPage() {
         (meal) => !meal.quantity || meal.quantity === "1" || meal.quantity === "unknown",
       )
 
+      console.log("🔄 Setting pending meal:", mealWithoutQuantity)
       setPendingMeal({
         ...mealWithoutQuantity,
         originalInput: currentInput,
@@ -550,32 +662,60 @@ export default function AvaPage() {
     // Log input for debugging
     inputConsoleHistory.push(currentInput)
     console.log("📋 Input history:", inputConsoleHistory)
+    console.log("🔄 Current state - awaitingQuantity:", awaitingQuantity, "pendingMeal:", pendingMeal)
 
     setInput("")
     setIsLoading(true)
 
     try {
-      // Handle quantity response flow
-      if (awaitingQuantity && pendingMeal) {
-        await handleQuantityResponse(currentInput, userMessage)
+      // Analyze user data first
+      const analysis = await analyzeUserData(currentInput)
+      console.log("📥 Full analysis result:", analysis)
+
+      // Check if analysis is null
+      if (!analysis) {
+        console.log("❌ Analysis is null, processing as regular chat")
+        const assistantMessage = await getChatResponse(userMessage, null)
+        setMessages((prev) => [...prev, assistantMessage])
         setIsLoading(false)
         return
       }
 
-      // Normal flow - analyze user data
-      const analysis = await analyzeUserData(currentInput)
+      // Handle quantity response flow - check if we're awaiting quantity AND this is quantity-only input
+      if (awaitingQuantity && pendingMeal && analysis?.is_quantity_only) {
+        console.log("🔄 Processing quantity response for pending meal:", pendingMeal.name)
+        console.log("📊 Extracted quantity:", analysis.extracted_quantity)
+        await handleQuantityResponse(analysis.extracted_quantity || currentInput, userMessage)
+        setIsLoading(false)
+        return
+      }
 
+      // IMPORTANT: DO NOT reset pending meal for unrelated queries
+      // Only reset if user provides a new meal, not for general questions
+      if (awaitingQuantity && pendingMeal && !analysis?.is_quantity_only && analysis?.meals_eaten?.length > 0) {
+        console.log("🔄 User provided new meal, resetting previous pending meal:", pendingMeal.name)
+        setPendingMeal(null)
+        setAwaitingQuantity(false)
+      } else if (awaitingQuantity && pendingMeal && !analysis?.is_quantity_only) {
+        console.log("🔄 Keeping pending meal state - user asked unrelated question:", currentInput)
+        console.log("📝 Pending meal still active:", pendingMeal.name)
+      }
+
+      // Normal flow - handle meal analysis
       if (analysis?.meals_eaten?.length > 0) {
+        console.log("🍽️ Processing new meal(s):", analysis.meals_eaten)
         await handleMealAnalysis(analysis, currentInput, userMessage)
-      } else if (analysis) {
+      } else if (analysis && (analysis.current_weight || analysis.calories_burned)) {
+        console.log("⚖️ Processing weight/calories data")
         await handleWeightAndCalories(analysis, userMessage)
       } else {
+        console.log("💬 No meal/health data found, processing as regular chat")
         // No analysis data - just get chat response
         const assistantMessage = await getChatResponse(userMessage, null)
         setMessages((prev) => [...prev, assistantMessage])
       }
     } catch (error) {
-      console.error("Error:", error)
+      console.error("❌ Error in handleSubmit:", error)
       setMessages((prev) => [...prev, createErrorMessage()])
     } finally {
       setIsLoading(false)
@@ -650,12 +790,23 @@ export default function AvaPage() {
       setAwaitingQuantity(false)
 
       setTimeout(() => {
-        setMessages([WELCOME_MESSAGE])
+        const thinkingMessage = {
+          id: "thinking",
+          role: "assistant",
+          content: "Thinking...",
+        }
+        setMessages([thinkingMessage])
         setShowWelcome(true)
         setIsPageLoading(false)
+      }, 100)
+
+      setTimeout(() => {
+        setMessages([WELCOME_MESSAGE])
         setTimeout(() => {
           setWelcomeAnimation(true)
-          showTimeBasedMessage() // Re-check notifications after clear
+          setTimeout(() => {
+            showTimeBasedMessage()
+          }, 2000)
         }, 50)
       }, 3000)
     }
@@ -698,14 +849,23 @@ export default function AvaPage() {
                       ? "bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-200"
                       : "bg-white text-gray-800 border border-gray-200"
                 } ${
-                  message.id === "welcome" && !welcomeAnimation
-                    ? "opacity-0 transform translate-y-4 scale-95"
-                    : message.id === "welcome" && welcomeAnimation
-                      ? "opacity-100 transform translate-y-0 scale-100"
-                      : ""
+                  message.id === "thinking"
+                    ? "flex items-center space-x-3"
+                    : message.id === "welcome" && !welcomeAnimation
+                      ? "opacity-0 transform translate-y-4 scale-95"
+                      : message.id === "welcome" && welcomeAnimation
+                        ? "opacity-100 transform translate-y-0 scale-100"
+                        : ""
                 }`}
               >
-                <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: message.content }} />
+                {message.id === "thinking" ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500"></div>
+                    <span className="text-sm md:text-base">Thinking...</span>
+                  </>
+                ) : (
+                  <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: message.content }} />
+                )}
               </div>
             </div>
           ))}
