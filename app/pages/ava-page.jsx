@@ -47,9 +47,181 @@ export default function AvaPage() {
   // ==================== REFS ====================
   const messagesEndRef = useRef(null)
   const chatContainerRef = useRef(null)
-  // Add this after other refs
 
   // ==================== UTILITY FUNCTIONS ====================
+
+  // Convert weight between units
+  const convertWeight = (weight, fromUnit, toUnit) => {
+    if (fromUnit === toUnit) return weight
+
+    if (fromUnit === "kg" && toUnit === "lbs") {
+      return weight * 2.20462
+    } else if (fromUnit === "lbs" && toUnit === "kg") {
+      return weight / 2.20462
+    }
+
+    return weight
+  }
+
+  // Create weight confirmation card HTML
+  const createWeightConfirmationCard = (weight, unit, originalWeight, originalUnit) => {
+    const displayWeight = Math.round(weight)
+    const displayUnit = unit === "kg" ? "kg" : "lb"
+    const formattedDate = new Date().toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    })
+
+    return `
+      <div class="weight-confirmation-card" style="
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        border-radius: 16px;
+        padding: 20px;
+        margin: 16px 0;
+        color: white;
+        box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
+        max-width: 280px;
+        position: relative;
+        overflow: hidden;
+      ">
+        <div style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 12px;
+          font-size: 14px;
+          opacity: 0.9;
+        ">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 4V2a1 1 0 0 1 2 0v2h6V2a1 1 0 0 1 2 0v2h1a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1Z"/>
+              <path d="M7 10h10"/>
+              <path d="M7 14h6"/>
+            </svg>
+            <span>Added to weight on ${formattedDate}</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style="opacity: 0.7;">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </div>
+        <div style="
+          font-size: 36px;
+          font-weight: bold;
+          line-height: 1;
+          margin-bottom: 4px;
+        ">
+          ${displayWeight}<span style="font-size: 24px; opacity: 0.8;">${displayUnit}</span>
+        </div>
+        ${
+          originalUnit !== unit
+            ? `
+          <div style="
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 4px;
+          ">
+            (${Math.round(originalWeight)} ${originalUnit === "kg" ? "kg" : "lbs"})
+          </div>
+        `
+            : ""
+        }
+        <div style="
+          position: absolute;
+          top: -20px;
+          right: -20px;
+          width: 80px;
+          height: 80px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 50%;
+          opacity: 0.3;
+        "></div>
+      </div>
+    `
+  }
+
+  // Create meals summary card
+  const createMealsSummaryCard = (meals) => {
+    if (!meals || meals.length === 0) return ""
+
+    const mealsByType = meals.reduce((acc, meal) => {
+      const type = meal.meal_type || "other"
+      if (!acc[type]) acc[type] = []
+      acc[type].push(meal)
+      return acc
+    }, {})
+
+    const mealTypeColors = {
+      breakfast: "#4CAF50",
+      lunch: "#FF9800",
+      dinner: "#2196F3",
+      snack: "#9C27B0",
+      other: "#607D8B",
+    }
+
+    let summaryHtml = `
+      <div class="meals-summary-card" style="
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 16px;
+        padding: 20px;
+        margin: 16px 0;
+        color: white;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        max-width: 400px;
+      ">
+        <div style="
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 16px;
+          font-size: 16px;
+          font-weight: bold;
+        ">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <span>Meals Added (${meals.length} items)</span>
+        </div>
+    `
+
+    Object.entries(mealsByType).forEach(([mealType, mealList]) => {
+      const color = mealTypeColors[mealType] || mealTypeColors.other
+      summaryHtml += `
+        <div style="
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          padding: 12px;
+          margin-bottom: 8px;
+        ">
+          <div style="
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: ${color};
+            text-transform: capitalize;
+          ">${mealType}</div>
+      `
+
+      mealList.forEach((meal) => {
+        summaryHtml += `
+          <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            font-size: 14px;
+          ">
+            <span>${meal.name}</span>
+            <span style="opacity: 0.8;">${meal.quantity}</span>
+          </div>
+        `
+      })
+
+      summaryHtml += `</div>`
+    })
+
+    summaryHtml += `</div>`
+    return summaryHtml
+  }
 
   // Scroll to bottom of chat
   const scrollToBottom = useCallback((force = false) => {
@@ -207,6 +379,7 @@ export default function AvaPage() {
       if (storedHealthData) {
         const parsedHealthData = JSON.parse(storedHealthData)
         setHealthData(parsedHealthData)
+        console.log("📥 Loaded health data from storage:", parsedHealthData)
       }
     } catch (error) {
       console.error("❌ Error loading data from localStorage:", error)
@@ -217,7 +390,6 @@ export default function AvaPage() {
 
   // Show thinking message first, then welcome message with delay
   const showWelcomeWithDelay = () => {
-    // First show thinking message in chat
     setTimeout(() => {
       const thinkingMessage = {
         id: "thinking",
@@ -229,12 +401,10 @@ export default function AvaPage() {
       setIsPageLoading(false)
     }, 100)
 
-    // After 3 seconds, replace thinking with welcome message
     setTimeout(() => {
       setMessages([WELCOME_MESSAGE])
       setTimeout(() => {
         setWelcomeAnimation(true)
-        // After 2 seconds, show time-based message
         setTimeout(() => {
           showTimeBasedMessage()
         }, 2000)
@@ -249,10 +419,6 @@ export default function AvaPage() {
       const { getPendingNotification } = await import("@/lib/time-based-notifications")
       const pendingNotification = await getPendingNotification()
 
-      console.log("🔍 Checking for time-based notifications...")
-
-      console.log("🔍 Pending notification result:", pendingNotification)
-
       if (pendingNotification) {
         const timeBasedMessage = {
           id: "time-based-" + Date.now(),
@@ -262,22 +428,17 @@ export default function AvaPage() {
 
         setTimeout(() => {
           setMessages((prev) => {
-            // Check if a time-based message already exists
             const hasTimeBasedMessage = prev.some(
               (msg) => msg.id.startsWith("time-based-") || msg.content === pendingNotification.message,
             )
 
             if (hasTimeBasedMessage) {
-              console.log("🚫 Time-based message already exists, skipping")
               return prev
             }
 
-            console.log("✅ Adding time-based message:", pendingNotification.type)
             return [...prev, timeBasedMessage]
           })
         }, 2000)
-      } else {
-        console.log("✅ No notification needed - user has data for current time window")
       }
     } catch (error) {
       console.error("❌ Error showing time-based message:", error)
@@ -328,7 +489,6 @@ export default function AvaPage() {
       const data = await response.json()
       console.log("📥 Analysis result:", data)
 
-      // Additional validation
       if (!data || typeof data !== "object") {
         console.error("❌ Invalid response format:", data)
         return null
@@ -347,15 +507,42 @@ export default function AvaPage() {
     }
   }
 
+  // Store weight data using the proxy API
+  const storeWeightDataViaProxy = async (weight, unit) => {
+    try {
+      console.log("📤 Storing weight via proxy API:", weight, unit)
+
+      const response = await fetch("/api/Proxy/weight", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          weight: weight,
+          unit: unit,
+          date: new Date().toISOString(),
+          timestamp: Date.now(),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Weight API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log("✅ Weight stored successfully:", data)
+      return data
+    } catch (error) {
+      console.error("❌ Error storing weight:", error)
+      throw error
+    }
+  }
+
   // Enrich meals with nutrition information
   const enrichMealsWithNutrition = async (meals, fallbackInput) => {
-    // Log the original meals array before enrichment
-    console.log("Original meals array:", meals)
+    console.log("🍽️ Starting nutrition enrichment for meals:", meals)
 
     const enrichedMeals = await Promise.all(
       meals.map(async (meal) => {
-        // Log each meal object before sending the request
-        console.log("Processing meal:", meal)
+        console.log("🔍 Processing meal:", meal)
 
         try {
           const response = await fetch("/api/food-details", {
@@ -369,39 +556,29 @@ export default function AvaPage() {
 
           if (response.ok) {
             const data = await response.json()
-
-            // Log the data received from the API (nutrition info)
-            console.log("Received nutrition data for meal:", meal.name, data)
+            console.log("📊 Received nutrition data for meal:", meal.name, data)
 
             if (data.nutritionInfo) {
-              // Log the enriched meal before returning
-              console.log("Enriched meal:", {
-                ...meal,
-                ...data.nutritionInfo,
-                edamamEnriched: true,
-                timestamp: new Date().toISOString(),
-              })
-
-              return {
+              const enrichedMeal = {
                 ...meal,
                 ...data.nutritionInfo,
                 edamamEnriched: true,
                 timestamp: new Date().toISOString(),
               }
+              console.log("✅ Enriched meal:", enrichedMeal)
+              return enrichedMeal
             }
           }
         } catch (error) {
-          console.error(`Error getting nutrition for ${meal.name}:`, error)
+          console.error(`❌ Error getting nutrition for ${meal.name}:`, error)
         }
 
-        // Return meal without enrichment if there's an error or no nutrition info
+        // Return meal without enrichment if there's an error
         return { ...meal, timestamp: new Date().toISOString() }
       }),
     )
 
-    // Log the final enriched meals array after Promise.all resolves
-    console.log("Final enriched meals:", enrichedMeals)
-
+    console.log("🍽️ Final enriched meals:", enrichedMeals)
     return enrichedMeals
   }
 
@@ -411,6 +588,7 @@ export default function AvaPage() {
     nutritionData,
     isQuantityResponse = false,
     needsQuantityPrompt = false,
+    isWeightResponse = false,
   ) => {
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -426,6 +604,7 @@ export default function AvaPage() {
         nutritionDetails: nutritionData,
         isQuantityResponse,
         needsQuantityPrompt,
+        isWeightResponse,
       }),
     })
 
@@ -465,40 +644,45 @@ export default function AvaPage() {
 
   // Update health data state and storage
   const updateHealthData = async (newData) => {
+    console.log("📊 Updating health data with:", newData)
+
     setHealthData((prev) => {
       const updated = { ...prev }
 
       // Add meals
       if (newData.meals) {
         updated.meals = [...prev.meals, ...newData.meals]
+        console.log("🍽️ Updated meals:", updated.meals)
       }
 
       // Add weight data
       if (newData.weight?.length > 0) {
         const weightEntry = {
           value: newData.weight[0],
-          unit: "kg",
+          unit: newData.weightUnit || "kg",
           timestamp: new Date().toISOString(),
           date: new Date().toLocaleDateString(),
         }
         updated.weight = [...prev.weight, weightEntry]
+        console.log("⚖️ Updated weight:", updated.weight)
 
-        // Store weight data
+        // Store weight data using original storeWeightData function
         storeWeightData(newData.weight[0]).catch((error) => console.error("❌ Failed to store weight data:", error))
-        console.log("Stored weight data:", updated.weight)
       }
 
       // Add calories data
       if (newData.calories?.length > 0) {
         const calorieEntry = {
           value: newData.calories[0],
-          type: "burned",
+          type: newData.calorieType || "consumed",
           timestamp: new Date().toISOString(),
           date: new Date().toLocaleDateString(),
         }
 
         const today = new Date().toLocaleDateString()
-        const existingIndex = prev.calories.findIndex((entry) => entry.date === today && entry.type === "burned")
+        const existingIndex = prev.calories.findIndex(
+          (entry) => entry.date === today && entry.type === calorieEntry.type,
+        )
 
         if (existingIndex >= 0) {
           updated.calories = [...prev.calories]
@@ -506,11 +690,20 @@ export default function AvaPage() {
         } else {
           updated.calories = [...prev.calories, calorieEntry]
         }
+        console.log("🔥 Updated calories:", updated.calories)
 
         // Store calories data
         storeCaloriesData(newData.calories[0]).catch((error) =>
           console.error("❌ Failed to store calories data:", error),
         )
+      }
+
+      // Save to localStorage
+      try {
+        localStorage.setItem(STORAGE_KEYS.HEALTH_DATA, JSON.stringify(updated))
+        console.log("💾 Saved health data to localStorage")
+      } catch (error) {
+        console.error("❌ Error saving health data to localStorage:", error)
       }
 
       return updated
@@ -519,12 +712,15 @@ export default function AvaPage() {
 
   // Store meals in database
   const storeMealsInDatabase = async (meals) => {
+    console.log("📤 Storing meals in database:", meals)
+
     for (const meal of meals) {
       if (meal.edamamEnriched) {
         try {
           await storeMealData(meal)
+          console.log("✅ Stored meal:", meal.name)
         } catch (error) {
-          console.error(`Failed to store meal ${meal.name}:`, error)
+          console.error(`❌ Failed to store meal ${meal.name}:`, error)
         }
       }
     }
@@ -532,36 +728,61 @@ export default function AvaPage() {
 
   // ==================== FORM HANDLERS ====================
 
+  // Handle weight logging
+  const handleWeightLogging = async (analysis, userMessage) => {
+    console.log("⚖️ Processing weight:", analysis.current_weight, analysis.weight_unit)
+
+    const originalWeight = analysis.current_weight
+    const originalUnit = analysis.weight_unit
+
+    // Convert to lbs for display (matching the image)
+    const displayWeight = originalUnit === "kg" ? convertWeight(originalWeight, "kg", "lbs") : originalWeight
+    const displayUnit = "lbs"
+
+    try {
+      // Store weight data via proxy API
+      await storeWeightDataViaProxy(originalWeight, originalUnit)
+
+      // Also store using original method for compatibility
+      updateHealthData({
+        weight: [originalWeight],
+        weightUnit: originalUnit,
+      })
+
+      // Create weight confirmation card
+      const weightCard = createWeightConfirmationCard(displayWeight, displayUnit, originalWeight, originalUnit)
+
+      // Get chat response
+      const assistantMessage = await getChatResponse(userMessage, null, false, false, true)
+
+      // Combine weight card with chat response
+      const combinedContent = weightCard + assistantMessage.content
+
+      const finalMessage = {
+        ...assistantMessage,
+        content: combinedContent,
+      }
+
+      setMessages((prev) => [...prev, finalMessage])
+    } catch (error) {
+      console.error("❌ Failed to process weight:", error)
+      // Still show a response even if storage fails
+      const assistantMessage = await getChatResponse(userMessage, null, false, false, true)
+      setMessages((prev) => [...prev, assistantMessage])
+    }
+  }
+
   // Handle quantity response flow
   const handleQuantityResponse = async (quantityValue, userMessage) => {
     console.log("📥 Processing quantity:", quantityValue, "for meal:", pendingMeal.name)
-    console.log("📊 Original pending meal:", pendingMeal)
-
-    // Clean and format the quantity
-    let cleanQuantity = quantityValue.trim()
-
-    // If it's just a number without unit, add "serving" as default
-    const numberOnlyRegex = /^\d+(\.\d+)?$/
-    if (numberOnlyRegex.test(cleanQuantity)) {
-      cleanQuantity = `${cleanQuantity} `
-    }
-
-    // Remove duplicate "serving" if it exists (fix the regex)
-    cleanQuantity = cleanQuantity.replace(/\bserving\s+serving\b/gi, "serving")
-
-    console.log("🔧 Cleaned quantity:", cleanQuantity)
 
     const updatedMeal = {
       ...pendingMeal,
-      quantity: cleanQuantity,
+      quantity: quantityValue.trim(),
     }
-
-    console.log("📥 Updated meal with quantity:", updatedMeal)
 
     const enrichedMeals = await enrichMealsWithNutrition([updatedMeal], updatedMeal.originalInput || pendingMeal.name)
     const nutritionData = enrichedMeals.filter((meal) => meal.edamamEnriched)
-
-    console.log("🍽️ Final enriched meals to store:", enrichedMeals)
 
     // Store meals
     await storeMealsInDatabase(enrichedMeals)
@@ -569,7 +790,6 @@ export default function AvaPage() {
     updateHealthData({ meals: enrichedMeals })
 
     // Reset quantity flow state
-    console.log("✅ Resetting pending meal state after successful quantity update")
     setPendingMeal(null)
     setAwaitingQuantity(false)
 
@@ -577,72 +797,110 @@ export default function AvaPage() {
     setMessages((prev) => [...prev, assistantMessage])
   }
 
-  // Handle normal meal analysis flow
-  const handleMealAnalysis = async (analysis, currentInput, userMessage) => {
-    console.log("📥 Analysis received:", analysis)
+  // Handle comprehensive analysis (meals + weight + calories)
+  const handleComprehensiveAnalysis = async (analysis, currentInput, userMessage) => {
+    console.log("🔍 Processing comprehensive analysis:", analysis)
 
-    // Check if meals are missing quantity
-    if (hasMissingQuantity(analysis.meals_eaten)) {
-      const mealWithoutQuantity = analysis.meals_eaten.find(
-        (meal) => !meal.quantity || meal.quantity === "1" || meal.quantity === "unknown",
-      )
+    let responseContent = ""
+    let allNutritionData = []
 
-      console.log("🔄 Setting pending meal:", mealWithoutQuantity)
-      setPendingMeal({
-        ...mealWithoutQuantity,
-        originalInput: currentInput,
-      })
-      setAwaitingQuantity(true)
+    // 1. Handle weight if present
+    if (analysis.current_weight && analysis.weight_unit) {
+      console.log("⚖️ Processing weight data")
+      const originalWeight = analysis.current_weight
+      const originalUnit = analysis.weight_unit
+      const displayWeight = originalUnit === "kg" ? convertWeight(originalWeight, "kg", "lbs") : originalWeight
+      const displayUnit = "lbs"
 
-      // Let Ava naturally ask for quantity
-      const quantityPromptMessage = await getChatResponse(userMessage, null, false, true)
-      setMessages((prev) => [...prev, quantityPromptMessage])
-      return
-    }
-
-    // Process meals with quantity
-    const enrichedMeals = await enrichMealsWithNutrition(analysis.meals_eaten, currentInput)
-    const nutritionData = enrichedMeals.filter((meal) => meal.edamamEnriched)
-
-    // Store meals
-    await storeMealsInDatabase(enrichedMeals)
-
-    updateHealthData({
-      meals: enrichedMeals,
-      weight: analysis.current_weight ? [analysis.current_weight] : [],
-      calories: analysis.calories_burned ? [analysis.calories_burned] : [],
-    })
-
-    const assistantMessage = await getChatResponse(userMessage, nutritionData)
-    setMessages((prev) => [...prev, assistantMessage])
-  }
-
-  // Handle weight and calories only
-  const handleWeightAndCalories = async (analysis, userMessage) => {
-    // Store weight and calories
-    if (analysis.current_weight) {
       try {
-        await storeWeightData(analysis.current_weight)
+        await storeWeightDataViaProxy(originalWeight, originalUnit)
+        updateHealthData({
+          weight: [originalWeight],
+          weightUnit: originalUnit,
+        })
+
+        const weightCard = createWeightConfirmationCard(displayWeight, displayUnit, originalWeight, originalUnit)
+        responseContent += weightCard
       } catch (error) {
-        console.error("Failed to store weight:", error)
+        console.error("❌ Failed to process weight:", error)
       }
     }
 
-    if (analysis.calories_burned) {
-      try {
-        await storeCaloriesData(analysis.calories_burned)
-      } catch (error) {
-        console.error("Failed to store calories:", error)
+    // 2. Handle meals if present
+    if (analysis.meals_eaten?.length > 0) {
+      console.log("🍽️ Processing meals data")
+
+      // Check if any meals are missing quantity
+      if (hasMissingQuantity(analysis.meals_eaten)) {
+        const mealWithoutQuantity = analysis.meals_eaten.find(
+          (meal) => !meal.quantity || meal.quantity === "1" || meal.quantity === "unknown",
+        )
+
+        setPendingMeal({
+          ...mealWithoutQuantity,
+          originalInput: currentInput,
+        })
+        setAwaitingQuantity(true)
+
+        const quantityPromptMessage = await getChatResponse(userMessage, null, false, true)
+        setMessages((prev) => [...prev, quantityPromptMessage])
+        return
+      }
+
+      // Process meals with quantities
+      const enrichedMeals = await enrichMealsWithNutrition(analysis.meals_eaten, currentInput)
+      const nutritionData = enrichedMeals.filter((meal) => meal.edamamEnriched)
+      allNutritionData = nutritionData
+
+      // Store meals
+      await storeMealsInDatabase(enrichedMeals)
+
+      updateHealthData({ meals: enrichedMeals })
+
+      // Create meals summary card
+      const mealsCard = createMealsSummaryCard(analysis.meals_eaten)
+      responseContent += mealsCard
+    }
+
+    // 3. Handle calories if present
+    if (analysis.calories_consumed || analysis.calories_burned) {
+      console.log("🔥 Processing calories data")
+
+      if (analysis.calories_consumed) {
+        try {
+          await storeCaloriesData(analysis.calories_consumed)
+          updateHealthData({
+            calories: [analysis.calories_consumed],
+            calorieType: "consumed",
+          })
+        } catch (error) {
+          console.error("❌ Failed to store consumed calories:", error)
+        }
+      }
+
+      if (analysis.calories_burned) {
+        try {
+          await storeCaloriesData(analysis.calories_burned)
+          updateHealthData({
+            calories: [analysis.calories_burned],
+            calorieType: "burned",
+          })
+        } catch (error) {
+          console.error("❌ Failed to store burned calories:", error)
+        }
       }
     }
 
-    updateHealthData({
-      weight: analysis.current_weight ? [analysis.current_weight] : [],
-      calories: analysis.calories_burned ? [analysis.calories_burned] : [],
-    })
+    // 4. Get chat response and combine with cards
+    const assistantMessage = await getChatResponse(userMessage, allNutritionData)
+    const finalContent = responseContent + assistantMessage.content
 
-    const assistantMessage = await getChatResponse(userMessage, null)
-    setMessages((prev) => [...prev, assistantMessage])
+    const finalMessage = {
+      ...assistantMessage,
+      content: finalContent,
+    }
+
+    setMessages((prev) => [...prev, finalMessage])
   }
 
   // Main form submit handler
@@ -681,36 +939,31 @@ export default function AvaPage() {
         return
       }
 
-      // Handle quantity response flow - check if we're awaiting quantity AND this is quantity-only input
+      // Handle quantity response flow
       if (awaitingQuantity && pendingMeal && analysis?.is_quantity_only) {
         console.log("🔄 Processing quantity response for pending meal:", pendingMeal.name)
-        console.log("📊 Extracted quantity:", analysis.extracted_quantity)
         await handleQuantityResponse(analysis.extracted_quantity || currentInput, userMessage)
         setIsLoading(false)
         return
       }
 
-      // IMPORTANT: DO NOT reset pending meal for unrelated queries
-      // Only reset if user provides a new meal, not for general questions
+      // Reset pending meal for new meals
       if (awaitingQuantity && pendingMeal && !analysis?.is_quantity_only && analysis?.meals_eaten?.length > 0) {
-        console.log("🔄 User provided new meal, resetting previous pending meal:", pendingMeal.name)
+        console.log("🔄 User provided new meal, resetting previous pending meal")
         setPendingMeal(null)
         setAwaitingQuantity(false)
-      } else if (awaitingQuantity && pendingMeal && !analysis?.is_quantity_only) {
-        console.log("🔄 Keeping pending meal state - user asked unrelated question:", currentInput)
-        console.log("📝 Pending meal still active:", pendingMeal.name)
       }
 
-      // Normal flow - handle meal analysis
-      if (analysis?.meals_eaten?.length > 0) {
-        console.log("🍽️ Processing new meal(s):", analysis.meals_eaten)
-        await handleMealAnalysis(analysis, currentInput, userMessage)
-      } else if (analysis && (analysis.current_weight || analysis.calories_burned)) {
-        console.log("⚖️ Processing weight/calories data")
-        await handleWeightAndCalories(analysis, userMessage)
+      // Handle comprehensive analysis (weight + meals + calories)
+      const hasWeight = analysis?.current_weight && analysis?.weight_unit
+      const hasMeals = analysis?.meals_eaten?.length > 0
+      const hasCalories = analysis?.calories_consumed || analysis?.calories_burned
+
+      if (hasWeight || hasMeals || hasCalories) {
+        console.log("🔍 Processing comprehensive data")
+        await handleComprehensiveAnalysis(analysis, currentInput, userMessage)
       } else {
-        console.log("💬 No meal/health data found, processing as regular chat")
-        // No analysis data - just get chat response
+        console.log("💬 No health data found, processing as regular chat")
         const assistantMessage = await getChatResponse(userMessage, null)
         setMessages((prev) => [...prev, assistantMessage])
       }
@@ -760,15 +1013,7 @@ export default function AvaPage() {
   // Save messages when they change
   useEffect(() => {
     saveMessagesToStorage(messages)
-    // Also save health data (including meals) to localStorage
-    if (healthData.meals.length > 0 || healthData.weight.length > 0 || healthData.calories.length > 0) {
-      try {
-        localStorage.setItem(STORAGE_KEYS.HEALTH_DATA, JSON.stringify(healthData))
-      } catch (error) {
-        console.error("❌ Error saving health data to localStorage:", error)
-      }
-    }
-  }, [messages, saveMessagesToStorage, healthData])
+  }, [messages, saveMessagesToStorage])
 
   // Cleanup and global functions setup
   useEffect(() => {
