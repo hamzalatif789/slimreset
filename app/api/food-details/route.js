@@ -18,6 +18,7 @@ export async function POST(req) {
     }
 
     const data = await response.json()
+    console.log("📥 Food admam details data:", data)
 
     let foodData = null
     if (data.parsed && data.parsed.length > 0) {

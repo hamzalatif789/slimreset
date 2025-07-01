@@ -141,87 +141,87 @@ export default function AvaPage() {
   }
 
   // Create meals summary card
-  const createMealsSummaryCard = (meals) => {
-    if (!meals || meals.length === 0) return ""
+  // const createMealsSummaryCard = (meals) => {
+  //   if (!meals || meals.length === 0) return ""
 
-    const mealsByType = meals.reduce((acc, meal) => {
-      const type = meal.meal_type || "other"
-      if (!acc[type]) acc[type] = []
-      acc[type].push(meal)
-      return acc
-    }, {})
+  //   const mealsByType = meals.reduce((acc, meal) => {
+  //     const type = meal.meal_type || "other"
+  //     if (!acc[type]) acc[type] = []
+  //     acc[type].push(meal)
+  //     return acc
+  //   }, {})
 
-    const mealTypeColors = {
-      breakfast: "#4CAF50",
-      lunch: "#FF9800",
-      dinner: "#2196F3",
-      snack: "#9C27B0",
-      other: "#607D8B",
-    }
+  //   const mealTypeColors = {
+  //     breakfast: "#4CAF50",
+  //     lunch: "#FF9800",
+  //     dinner: "#2196F3",
+  //     snack: "#9C27B0",
+  //     other: "#607D8B",
+  //   }
 
-    let summaryHtml = `
-      <div class="meals-summary-card" style="
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 16px;
-        padding: 20px;
-        margin: 16px 0;
-        color: white;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-        max-width: 400px;
-      ">
-        <div style="
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 16px;
-          font-size: 16px;
-          font-weight: bold;
-        ">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-          </svg>
-          <span>Meals Added (${meals.length} items)</span>
-        </div>
-    `
+  //   let summaryHtml = `
+  //     <div class="meals-summary-card" style="
+  //       background: linear-gradient(135deg, #667eea, #764ba2);
+  //       border-radius: 16px;
+  //       padding: 20px;
+  //       margin: 16px 0;
+  //       color: white;
+  //       box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  //       max-width: 400px;
+  //     ">
+  //       <div style="
+  //         display: flex;
+  //         align-items: center;
+  //         gap: 8px;
+  //         margin-bottom: 16px;
+  //         font-size: 16px;
+  //         font-weight: bold;
+  //       ">
+  //         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  //           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+  //         </svg>
+  //         <span>Meals Added (${meals.length} items)</span>
+  //       </div>
+  //   `
 
-    Object.entries(mealsByType).forEach(([mealType, mealList]) => {
-      const color = mealTypeColors[mealType] || mealTypeColors.other
-      summaryHtml += `
-        <div style="
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 8px;
-          padding: 12px;
-          margin-bottom: 8px;
-        ">
-          <div style="
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: ${color};
-            text-transform: capitalize;
-          ">${mealType}</div>
-      `
+  //   Object.entries(mealsByType).forEach(([mealType, mealList]) => {
+  //     const color = mealTypeColors[mealType] || mealTypeColors.other
+  //     summaryHtml += `
+  //       <div style="
+  //         background: rgba(255, 255, 255, 0.1);
+  //         border-radius: 8px;
+  //         padding: 12px;
+  //         margin-bottom: 8px;
+  //       ">
+  //         <div style="
+  //           font-weight: bold;
+  //           margin-bottom: 8px;
+  //           color: ${color};
+  //           text-transform: capitalize;
+  //         ">${mealType}</div>
+  //     `
 
-      mealList.forEach((meal) => {
-        summaryHtml += `
-          <div style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 0;
-            font-size: 14px;
-          ">
-            <span>${meal.name}</span>
-            <span style="opacity: 0.8;">${meal.quantity}</span>
-          </div>
-        `
-      })
+  //     mealList.forEach((meal) => {
+  //       summaryHtml += `
+  //         <div style="
+  //           display: flex;
+  //           justify-content: space-between;
+  //           align-items: center;
+  //           padding: 4px 0;
+  //           font-size: 14px;
+  //         ">
+  //           <span>${meal.name}</span>
+  //           <span style="opacity: 0.8;">${meal.quantity}</span>
+  //         </div>
+  //       `
+  //     })
 
-      summaryHtml += `</div>`
-    })
+  //     summaryHtml += `</div>`
+  //   })
 
-    summaryHtml += `</div>`
-    return summaryHtml
-  }
+  //   summaryHtml += `</div>`
+  //   return summaryHtml
+  // }
 
   // Scroll to bottom of chat
   const scrollToBottom = useCallback((force = false) => {
@@ -487,7 +487,7 @@ export default function AvaPage() {
       }
 
       const data = await response.json()
-      console.log("📥 Analysis result:", data)
+      console.log("📥 Analysis analyze-meal result:", data)
 
       if (!data || typeof data !== "object") {
         console.error("❌ Invalid response format:", data)
@@ -611,6 +611,7 @@ export default function AvaPage() {
     if (!response.ok) throw new Error("Failed to get chat response")
 
     const data = await response.json()
+    console.log("📥 Chat response data:", data)
     let content = data.message
 
     // Add nutrition summary if available
@@ -652,7 +653,7 @@ export default function AvaPage() {
       // Add meals
       if (newData.meals) {
         updated.meals = [...prev.meals, ...newData.meals]
-        console.log("🍽️ Updated meals:", updated.meals)
+        // console.log("🍽️ Updated meals:", updated.meals)
       }
 
       // Add weight data
@@ -858,8 +859,8 @@ export default function AvaPage() {
       updateHealthData({ meals: enrichedMeals })
 
       // Create meals summary card
-      const mealsCard = createMealsSummaryCard(analysis.meals_eaten)
-      responseContent += mealsCard
+      // const mealsCard = createMealsSummaryCard(analysis.meals_eaten)
+      // responseContent += mealsCard
     }
 
     // 3. Handle calories if present

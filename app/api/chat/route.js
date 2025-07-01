@@ -834,6 +834,10 @@ export async function POST(req) {
       },
       ...messages,
     ]
+    // Add before generateText
+    console.log("🤖 Starting AI generation...")
+    console.log("User message:", userMessage)
+    console.log("Total messages in conversation:", conversation.length)
 
 
 
@@ -843,6 +847,12 @@ export async function POST(req) {
       temperature: 0.7,
       maxTokens: 1800,
     })
+    // Add after generateText
+    console.log("✅ AI response generated:", text)
+    console.log("Response length:", text.length)
+
+    // Add before return
+    console.log("📤 Sending response to client")
 
     return NextResponse.json({ message: text })
   } catch (error) {
